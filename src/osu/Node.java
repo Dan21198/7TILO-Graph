@@ -1,24 +1,34 @@
 package osu;
 
-
-import java.util.HashMap;
-import java.util.Map;
-
 class Node {
-    private final int id;
-    public int resources;  // The resources available at this node
-    public final Map<Node, Integer> edges = new HashMap<>();  // Outgoing edges and their costs
+    int id;
+    int resource;
+    private boolean visited; // Flag to track if the node has been visited
 
-    public Node(int id, int resources) {
+    Node(int id, int resource) {
         this.id = id;
-        this.resources = resources;
+        this.resource = resource;
+        this.visited = false; // Initially, the node is not visited
     }
 
-    public void addEdge(Node neighbor, int cost) {
-        edges.put(neighbor, cost);
+    // Getter for resource
+    public int getResource() {
+        return resource;
     }
 
-    public int getId() {
-        return id;
+    // Set the resource to 0 after it's used
+    public void useResource() {
+        resource = 0;
+    }
+
+    // Mark the node as visited
+    public void visit() {
+        this.visited = true;
+    }
+
+    // Check if the node has been visited
+    public boolean isVisited() {
+        return this.visited;
     }
 }
+
