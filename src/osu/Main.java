@@ -1,23 +1,54 @@
 package osu;
 
+import java.util.List;
+
 public class Main {
     public static void main(String[] args) {
-        Graph graph = new Graph();
+        GraphOptimizer optimizer = new GraphOptimizer();
 
-        // Create nodes (id, resource value)
-        graph.addNode(1, 5); // Initial node with resource 5
-        graph.addNode(2, 3);
-        graph.addNode(3, 4);
-        graph.addNode(4, 2);
+        // Create nodes
+        Node node1 = new Node(1, 5, true);   // Initial node
+        Node node2 = new Node(2, 10, false);
+        Node node3 = new Node(3, 15, false);
+        Node node4 = new Node(4, 20, false);
 
-        // Add edges (fromNode, toNode, cost)
-        graph.addEdge(1, 2, 100);
-        graph.addEdge(1, 3, 150);
-        graph.addEdge(2, 4, 50);
-        graph.addEdge(3, 4, 100);
+        // Create edges
+        Edge edge1 = new Edge(1, node1, node2, 100);
+        Edge edge2 = new Edge(2, node1, node3, 150);
+        Edge edge3 = new Edge(3, node2, node4, 200);
+        Edge edge4 = new Edge(4, node3, node4, 180);
 
-        // Initialize the graph traversal with a budget of 485 and initial resources of 0
-        GraphTraversal traversal = new GraphTraversal(graph, 485, 0);
-        traversal.traverse();
+        // Connect nodes with edges
+        node1.addEdge(edge1);
+        node1.addEdge(edge2);
+        node2.addEdge(edge3);
+        node3.addEdge(edge4);
+
+        // Add nodes to optimizer
+        optimizer.addNode(node1);
+        optimizer.addNode(node2);
+        optimizer.addNode(node3);
+        optimizer.addNode(node4);
+
+        // Run optimization
+        State result = optimizer.optimize(485);
+
+        // Print results in required format
+        List<StateStep> steps = result.getStateSteps();
+        if (!steps.isEmpty()) {
+            for (StateStep step : steps) {
+                System.out.printf("[t_%d] h_%d (%d), u_%d (%d) -> r=%d, z=%d%n",
+                        step.getTime(),
+                        step.getEdgeId(),
+                        step.getEdgeCost(),
+                        step.getNodeId(),
+                        step.getNodeResources(),
+                        step.getBudget(),
+                        step.getResources()
+                );
+            }
+        } else {
+            System.out.println("No valid path found!");
+        }
     }
 }

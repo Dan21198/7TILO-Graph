@@ -1,34 +1,26 @@
 package osu;
 
+import java.util.ArrayList;
+import java.util.List;
+
 class Node {
-    int id;
-    int resource;
-    private boolean visited; // Flag to track if the node has been visited
+    private int id;
+    private int resources;
+    private boolean isInitial;
+    private List<Edge> edges;
 
-    Node(int id, int resource) {
+    public Node(int id, int resources, boolean isInitial) {
         this.id = id;
-        this.resource = resource;
-        this.visited = false; // Initially, the node is not visited
+        this.resources = resources;
+        this.isInitial = isInitial;
+        this.edges = new ArrayList<>();
     }
 
-    // Getter for resource
-    public int getResource() {
-        return resource;
-    }
+    public int getId() { return id; }
+    public int getResources() { return resources; }    // Changed from getResource
+    public void setResources(int resources) { this.resources = resources; }
+    public boolean isInitial() { return isInitial; }
+    public List<Edge> getEdges() { return edges; }
+    public void addEdge(Edge edge) { edges.add(edge); }
 
-    // Set the resource to 0 after it's used
-    public void useResource() {
-        resource = 0;
-    }
-
-    // Mark the node as visited
-    public void visit() {
-        this.visited = true;
-    }
-
-    // Check if the node has been visited
-    public boolean isVisited() {
-        return this.visited;
-    }
 }
-

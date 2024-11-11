@@ -1,24 +1,25 @@
 package osu;
 
 class Edge {
-    Node from;
-    Node to;
-    int cost; // The cost of traversing this edge
+    private int id;
+    private Node source;
+    private Node target;
+    private int cost;
+    private boolean used;
 
-    Edge(Node from, Node to, int cost) {
-        this.from = from;
-        this.to = to;
+    public Edge(int id, Node source, Node target, int cost) {
+        this.id = id;
+        this.source = source;
+        this.target = target;
         this.cost = cost;
+        this.used = false;
     }
 
-    // Get the cost to traverse this edge
-    public int getCost() {
-        return cost;
-    }
-
-    // Method to traverse the edge and return whether it is traversable (based on available budget)
-    public boolean traverse(int availableBudget) {
-        return availableBudget >= cost; // Return whether the budget allows this edge to be traversed
-    }
+    public int getId() { return id; }
+    public Node getSource() { return source; }
+    public Node getTarget() { return target; }
+    public int getCost() { return cost; }
+    public boolean isUsed() { return used; }
+    public void setUsed(boolean used) { this.used = used; }
 }
 
