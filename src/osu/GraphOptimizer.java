@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-class GraphOptimizer {
+public class GraphOptimizer {
     private List<Node> nodes;
     private int maxResources;
     private State bestState;
@@ -51,7 +51,7 @@ class GraphOptimizer {
         // Collect resources from current node
         int nodeResources = currentNode.getResources();
         currentState.setResources(currentState.getResources() + nodeResources);
-        currentNode.setResources(0);
+        currentNode.setResources(0); // Resources are collected
 
         // Update best state if we found better solution
         if (currentState.getResources() > maxResources) {
@@ -67,9 +67,7 @@ class GraphOptimizer {
         // Try all possible edges
         for (Edge edge : currentNode.getEdges()) {
             Node nextNode = edge.getTarget();
-            int edgeCost = currentState.getUsedEdges().contains(edge) ? 0 : edge.getCost();
-
-            // Try two strategies for each edge:
+            int edgeCost = edge.getCost();
 
             // Strategy 1: Keep current resources as z
             if (currentState.getBudget() >= edgeCost) {
@@ -81,7 +79,7 @@ class GraphOptimizer {
                     newState.getStateSteps().add(step);
                 }
                 if (!edge.isUsed()) {
-                    edge.setUsed(true);
+                    edge.setUsed(true);  // Mark edge as used
                     newState.getUsedEdges().add(edge);
                 }
                 exploreNode(nextNode, newState, edge, new HashSet<>(currentPath));
@@ -98,7 +96,7 @@ class GraphOptimizer {
                     newState.getStateSteps().add(step);
                 }
                 if (!edge.isUsed()) {
-                    edge.setUsed(true);
+                    edge.setUsed(true); // Mark edge as used
                     newState.getUsedEdges().add(edge);
                 }
                 exploreNode(nextNode, newState, edge, new HashSet<>(currentPath));
