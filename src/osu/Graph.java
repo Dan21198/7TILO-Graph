@@ -42,11 +42,4 @@ class Graph {
         }
         return nodeEdges;
     }
-
-    // Print the graph structure (for debugging purposes)
-    public void printGraph() {
-        for (Edge edge : edges) {
-            System.out.println("Edge from u_" + edge.from.id + " to u_" + edge.to.id + " with cost " + edge.cost);
-        }
-    }
 }
