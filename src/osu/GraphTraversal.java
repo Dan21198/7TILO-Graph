@@ -2,50 +2,58 @@ package osu;
 
 import java.util.*;
 
-public class GraphTraversal {
+class GraphTraversal {
+    public static void maximizeResources(Graph graph, Node startNode, int initialBudget) {
+        int budget = initialBudget;  // Initial budget (r)
+        int resourcesCollected = 0;  // Total resources collected (z)
+        Set<Node> visited = new HashSet<>();  // Set to track visited nodes
 
-    public static void maximizeResources(Graph graph, Node startNode, int initialBudget, int initialResources) {
-        Queue<State> queue = new LinkedList<>();
-        Set<Node> visited = new HashSet<>();
-        State initialState = new State(startNode, 0, initialBudget, initialResources);
-        queue.add(initialState);
+        // Queue to manage BFS-like traversal
+        Queue<Node> toVisit = new LinkedList<>();
+        toVisit.add(startNode);
 
-        while (!queue.isEmpty()) {
-            State currentState = queue.poll();
-            Node currentNode = currentState.node;
+        int timeStep = 1;
+        visited.add(startNode);  // Mark the start node as visited
 
-            // Skip if this node was visited already
-            if (visited.contains(currentNode)) {
-                continue;
-            }
-            visited.add(currentNode);
+        while (!toVisit.isEmpty()) {
+            Node currentNode = toVisit.poll();
 
-            // Collect resources from the current node, if it's not already collected
-            if (currentState.time == 0 && currentNode.resources > 0) {
-                currentState.resources += currentNode.resources;
-                currentNode.resources = 0; // Set resources to zero after collection
-            }
+            // Collect resources at the current node
+            int resourcesAtNode = currentNode.resources;
+            resourcesCollected += resourcesAtNode;  // Add resources to the total collected
+            currentNode.resources = 0;  // Mark the node as visited and its resources as collected
 
-            // Output the state at the current step
-            System.out.println("[" + currentState.time + "] " + currentNode.nodeNumber + " -> r=" + currentState.budget + ", z=" + currentState.resources);
+            // Print the state after collecting resources from the current node
+            System.out.println(String.format("[t_%d] h_%d, u_%d -> r=%d, z=%d",
+                    timeStep, currentNode.getId(), currentNode.getId(), budget, resourcesCollected));
 
-            // Get possible edges to traverse from current node
-            for (Edge edge : graph.getEdges(currentNode)) {
-                // Check if we have enough budget to traverse the edge
-                if (currentState.budget >= edge.cost) {
-                    // Calculate new resources after traversing the edge
-                    int newResources = currentState.resources + edge.target.resources;
+            // Flag to track if any valid traversal happens
+            boolean moved = false;
 
-                    // Update state
-                    State newState = new State(edge.target, currentState.time + 1,
-                            currentState.budget - edge.cost, newResources);
+            // Traverse to the neighboring nodes if there is enough budget
+            for (Map.Entry<Node, Integer> entry : currentNode.edges.entrySet()) {
+                Node neighbor = entry.getKey();
+                int edgeCost = entry.getValue();
 
-                    // Add the new state to the queue for further processing
-                    queue.add(newState);
+                // Can we afford to traverse this edge?
+                if (budget >= edgeCost && !visited.contains(neighbor)) {
+                    toVisit.add(neighbor);
+                    visited.add(neighbor);  // Mark the neighbor as visited
+                    moved = true;  // Mark that we moved to a neighbor
 
-                    // Zero the resources at the node after collection
-                    edge.target.resources = 0;
+                    // Print the state after traversing to the neighbor
+                    System.out.println(String.format("[t_%d] h_%d, u_%d -> r=%d, z=%d",
+                            timeStep + 1, currentNode.getId(), neighbor.getId(),
+                            budget - edgeCost, resourcesCollected));
+
+                    // Spend the resources on traversing the edge
+                    budget -= edgeCost;
                 }
+            }
+
+            // Only increment the time step if we actually moved to a new node
+            if (moved) {
+                timeStep++;
             }
         }
     }

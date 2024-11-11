@@ -1,29 +1,21 @@
 package osu;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 class Graph {
-    private Map<Node, List<Edge>> adjacencyList;
+    private final Map<Integer, Node> nodes = new HashMap<>();
 
-    public Graph() {
-        this.adjacencyList = new HashMap<>();
+    public void addNode(int id, int resources) {
+        nodes.put(id, new Node(id, resources));
     }
 
-    // Add node to the graph
-    public void addNode(Node node) {
-        adjacencyList.putIfAbsent(node, new ArrayList<>());
+    public void addEdge(int from, int to, int cost) {
+        Node fromNode = nodes.get(from);
+        Node toNode = nodes.get(to);
+        fromNode.addEdge(toNode, cost);
     }
 
-    // Add an edge between two nodes
-    public void addEdge(Node from, Node to, int cost) {
-        adjacencyList.computeIfAbsent(from, k -> new ArrayList<>()).add(new Edge(to, cost));
-    }
-
-    // Get edges for a given node
-    public List<Edge> getEdges(Node node) {
-        return adjacencyList.getOrDefault(node, new ArrayList<>());
+    public Node getNode(int id) {
+        return nodes.get(id);
     }
 }
