@@ -1,34 +1,51 @@
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.PriorityQueue;
-import java.util.Set;
+package osu;
 
-public static void traverseGraph(Node startNode, int budget, int resources) {
-    PriorityQueue<State> queue = new PriorityQueue<>(Comparator.comparingInt(s -> -s.resources));
-    queue.add(new State(startNode, 0, budget, resources));
-    Set<Node> visited = new HashSet<>();
+import java.util.*;
 
-    while (!queue.isEmpty()) {
-        State current = queue.poll();
+public class GraphTraversal {
 
-        // Pokud je dosažen nejlepší možný stav (všechny dostupné zdroje získány), ukončíme průchod
-        if (visited.contains(current.node) || current.node.resource == 0) {
-            continue;
-        }
+    public static void maximizeResources(Graph graph, Node startNode, int initialBudget, int initialResources) {
+        Queue<State> queue = new LinkedList<>();
+        Set<Node> visited = new HashSet<>();
+        State initialState = new State(startNode, 0, initialBudget, initialResources);
+        queue.add(initialState);
 
-        // Výpis aktuálního stavu
-        System.out.printf("[t_%d] uzel %d -> r=%d, z=%d\n", current.time, current.node.id, current.budget, current.resources);
+        while (!queue.isEmpty()) {
+            State currentState = queue.poll();
+            Node currentNode = currentState.node;
 
-        // Přičteme zdroje z aktuálního uzlu
-        current.resources += current.node.resource;
-        current.node.resource = 0; // Zdroje uzlu byly získány
-        visited.add(current.node);
+            // Skip if this node was visited already
+            if (visited.contains(currentNode)) {
+                continue;
+            }
+            visited.add(currentNode);
 
-        // Průchod přes dostupné hrany, pouze pokud je dostatečný rozpočet
-        for (Edge edge : current.node.edges) {
-            if (current.budget >= edge.cost) {
-                int newBudget = current.budget - edge.cost + edge.target.resource;
-                queue.add(new State(edge.target, current.time + 1, newBudget, current.resources));
+            // Collect resources from the current node, if it's not already collected
+            if (currentState.time == 0 && currentNode.resources > 0) {
+                currentState.resources += currentNode.resources;
+                currentNode.resources = 0; // Set resources to zero after collection
+            }
+
+            // Output the state at the current step
+            System.out.println("[" + currentState.time + "] " + currentNode.nodeNumber + " -> r=" + currentState.budget + ", z=" + currentState.resources);
+
+            // Get possible edges to traverse from current node
+            for (Edge edge : graph.getEdges(currentNode)) {
+                // Check if we have enough budget to traverse the edge
+                if (currentState.budget >= edge.cost) {
+                    // Calculate new resources after traversing the edge
+                    int newResources = currentState.resources + edge.target.resources;
+
+                    // Update state
+                    State newState = new State(edge.target, currentState.time + 1,
+                            currentState.budget - edge.cost, newResources);
+
+                    // Add the new state to the queue for further processing
+                    queue.add(newState);
+
+                    // Zero the resources at the node after collection
+                    edge.target.resources = 0;
+                }
             }
         }
     }

@@ -1,14 +1,12 @@
-import java.util.ArrayList;
-import java.util.List;
+package osu;
+
 
 class Node {
-    int id;
-    int resource;
-    List<Edge> edges;
+    int nodeNumber;
+    int resources;
 
-    public Node(int id, int resource) {
-        this.id = id;
-        this.resource = resource;
-        this.edges = new ArrayList<>();
+    public Node(int nodeNumber, int resources) {
+        this.nodeNumber = nodeNumber;
+        this.resources = resources;
     }
 }

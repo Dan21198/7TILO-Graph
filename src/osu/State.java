@@ -1,3 +1,4 @@
+package osu;
 
 class State {
     Node node;

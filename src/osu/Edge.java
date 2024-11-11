@@ -1,3 +1,4 @@
+package osu;
 
 class Edge {
     Node target;
