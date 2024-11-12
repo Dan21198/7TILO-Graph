@@ -37,15 +37,12 @@ public class Main {
         Edge edge13 = new Edge(node13, node14, 57);
         Edge edge14 = new Edge(node13, node15, 30);
 
-        // Initial budget
         int initialBudget = 485;
 
-        // Create a graph with nodes and edges
         List<Node> nodes = Arrays.asList(node1, node2, node3, node4, node5, node6, node7, node8, node9, node10, node11, node12, node13, node14, node15);
         List<Edge> edges = Arrays.asList(edge1, edge2, edge3, edge4, edge5, edge6, edge7, edge8, edge9, edge10, edge11, edge12, edge13, edge14);
         Graph graph = new Graph(nodes, edges);
 
-        // Start traversal with the given initial budget
         Traversal traversal = new Traversal(graph, initialBudget);
         traversal.startTraversal();
     }

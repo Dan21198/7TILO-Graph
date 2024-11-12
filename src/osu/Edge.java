@@ -1,7 +1,7 @@
 package osu;
 
 public class Edge {
-    private static int idCounter = 0;  // Static counter to generate unique IDs for edges
+    private static int idCounter = 0;
     private int id;
     private Node fromNode;
     private Node toNode;
