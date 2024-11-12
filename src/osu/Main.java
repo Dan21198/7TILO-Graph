@@ -33,22 +33,5 @@ public class Main {
         // Run optimization
         State result = optimizer.optimize(485);
 
-        // Print results in required format
-        List<StateStep> steps = result.getStateSteps();
-        if (!steps.isEmpty()) {
-            for (StateStep step : steps) {
-                System.out.printf("[t_%d] h_%d (%d), u_%d (%d) -> r=%d, z=%d%n",
-                        step.getTime(),
-                        step.getEdgeId(),
-                        step.getEdgeCost(),
-                        step.getNodeId(),
-                        step.getNodeResources(),
-                        step.getBudget(),
-                        step.getResources()
-                );
-            }
-        } else {
-            System.out.println("No valid path found!");
-        }
     }
 }

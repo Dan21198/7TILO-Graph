@@ -1,20 +1,19 @@
 package osu;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class GraphOptimizer {
     private List<Node> nodes;
     private int maxResources;
     private State bestState;
     private int time;
+    private Map<String, State> visitedStates;
 
     public GraphOptimizer() {
         this.nodes = new ArrayList<>();
         this.maxResources = 0;
         this.time = 1;
+        this.visitedStates = new HashMap<>();
     }
 
     public void addNode(Node node) {
@@ -29,6 +28,9 @@ public class GraphOptimizer {
 
         State initialState = new State(initialBudget);
         bestState = initialState;
+
+        PriorityQueue<State> priorityQueue = new PriorityQueue<>(Comparator.comparingInt(this::getHeuristic).reversed());
+        priorityQueue.add(initialState);
 
         exploreNode(startNode, initialState, null, new HashSet<>());
         return bestState;
@@ -64,10 +66,21 @@ public class GraphOptimizer {
             }
         }
 
-        // Try all possible edges
+        // Output the step information with r and z
+        System.out.printf("[t_%d] h_%d (%d), u_%d (%d) -> r=%d, z=%d%n",
+                time,
+                incomingEdge != null ? incomingEdge.getId() : -1,  // h_i
+                incomingEdge != null ? incomingEdge.getCost() : 0, // Edge cost
+                currentNode.getId(),  // u_i
+                currentNode.getResources(), // Node resources
+                currentState.getResources(),  // r - current resources
+                Math.min(currentState.getResources(), currentNode.getResources()) // z - min resources
+        );
+
+        // Explore all possible edges from the current node
         for (Edge edge : currentNode.getEdges()) {
             Node nextNode = edge.getTarget();
-            int edgeCost = edge.getCost();
+            int edgeCost = currentState.getUsedEdges().contains(edge) ? 0 : edge.getCost();
 
             // Strategy 1: Keep current resources as z
             if (currentState.getBudget() >= edgeCost) {
@@ -75,13 +88,8 @@ public class GraphOptimizer {
                 newState.setBudget(currentState.getBudget() - edgeCost);
                 newState.setResources(currentState.getResources());
                 newState.getUsedEdges().addAll(currentState.getUsedEdges());
-                for (StateStep step : currentState.getStateSteps()) {
-                    newState.getStateSteps().add(step);
-                }
-                if (!edge.isUsed()) {
-                    edge.setUsed(true);  // Mark edge as used
-                    newState.getUsedEdges().add(edge);
-                }
+                newState.getUsedEdges().add(edge);
+
                 exploreNode(nextNode, newState, edge, new HashSet<>(currentPath));
             }
 
@@ -92,18 +100,17 @@ public class GraphOptimizer {
                 newState.setBudget(potentialBudget - edgeCost);
                 newState.setResources(0); // Reset resources as we used them for budget
                 newState.getUsedEdges().addAll(currentState.getUsedEdges());
-                for (StateStep step : currentState.getStateSteps()) {
-                    newState.getStateSteps().add(step);
-                }
-                if (!edge.isUsed()) {
-                    edge.setUsed(true); // Mark edge as used
-                    newState.getUsedEdges().add(edge);
-                }
+                newState.getUsedEdges().add(edge);
+
                 exploreNode(nextNode, newState, edge, new HashSet<>(currentPath));
             }
         }
 
         // Remove current node from path before backtracking
         currentPath.remove(currentNode);
+    }
+
+    private int getHeuristic(State state) {
+        return state.getBudget() + state.getResources();
     }
 }

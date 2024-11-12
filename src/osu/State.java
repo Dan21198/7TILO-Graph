@@ -1,9 +1,6 @@
 package osu;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 class State {
     private int budget;
@@ -39,5 +36,23 @@ class State {
                 node.getId(), node.getResources(),
                 budget, resources);
         stateSteps.add(step);
+    }
+    // Method to generate a unique key for the state based on budget and resources
+    public String getStateKey() {
+        return "Budget:" + budget + "_Resources:" + resources;
+    }
+
+    // For equality check and to ensure uniqueness in HashMap or HashSet
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        State state = (State) o;
+        return budget == state.budget && resources == state.resources;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(budget, resources);
     }
 }
