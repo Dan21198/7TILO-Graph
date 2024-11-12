@@ -16,11 +16,27 @@ public class Node {
         this.edges = new ArrayList<>();
     }
 
-    public int getId() { return id; }
-    public int getResources() { return resources; }
-    public void setResources(int resources) { this.resources = resources; }
-    public boolean isInitial() { return isInitial; }
-    public List<Edge> getEdges() { return edges; }
+    public void addEdge(Edge edge) {
+        edges.add(edge);
+    }
 
-    public void addEdge(Edge edge) { edges.add(edge); }
+    public int getResources() {
+        return resources;
+    }
+
+    public void setResources(int resources) {
+        this.resources = resources;
+    }
+
+    public boolean isInitial() {
+        return isInitial;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public List<Edge> getEdges() {
+        return edges;
+    }
 }

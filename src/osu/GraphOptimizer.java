@@ -21,71 +21,116 @@ public class GraphOptimizer {
     }
 
     public State optimize(int initialBudget) {
-        Node startNode = nodes.stream()
-                .filter(Node::isInitial)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No initial node found"));
-
+        Node startNode = findStartNode();
+        System.out.println("Initial budget: " + initialBudget);
         State initialState = new State(initialBudget);
-        bestState = initialState;
+        bestState = new State(initialBudget);
+        bestState.setResources(0);  // Initialize with zero resources
 
-        // Start exploring from the initial node
-        exploreNode(startNode, initialState, null, new HashSet<>());
+        exploreNode(startNode, initialState, null, new HashSet<>(), new HashSet<>());
+
         return bestState;
     }
 
-    private void exploreNode(Node currentNode, State currentState, Edge incomingEdge, Set<Node> currentPath) {
-        // Skip if node is in current path (avoid cycles)
+    private Node findStartNode() {
+        return nodes.stream()
+                .filter(Node::isInitial)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No initial node found"));
+    }
+
+    private void exploreNode(Node currentNode, State currentState, Edge incomingEdge, Set<Node> currentPath, Set<Edge> traversedEdges) {
+        // Skip if node is in current path (to avoid cycles)
         if (currentPath.contains(currentNode)) {
             return;
         }
 
-        // Add current node to path
+        // Add current node to path to avoid cycles
         currentPath.add(currentNode);
 
-        // Collect resources from current node (keep node's resources intact for later)
-        int nodeResources = currentNode.getResources();
-        int resourcesBeforeUpdate = currentState.getResources();
-        currentState.setResources(resourcesBeforeUpdate + nodeResources); // Add current node's resources to state
+        // Clone the state to avoid modifying the same instance in recursive calls
+        State updatedState = new State(currentState.getBudget());
+        updatedState.setResources(currentState.getResources()); // Carry over resources from previous state
+        updatedState.getStateSteps().addAll(currentState.getStateSteps());
 
-        // Update best state if we found better solution
-        if (currentState.getResources() > maxResources) {
-            maxResources = currentState.getResources();
-            bestState = new State(currentState.getBudget());
-            bestState.setResources(currentState.getResources());
-            bestState.getStateSteps().clear();
-            for (StateStep step : currentState.getStateSteps()) {
-                bestState.getStateSteps().add(step);
-            }
+        // Only collect resources if they haven't been collected on this path
+        int nodeResources = currentNode.getResources();
+        if (nodeResources > 0) {
+            updatedState.setResources(updatedState.getResources() + nodeResources);
+            currentNode.setResources(0);  // Set node resources to 0 for this path
         }
 
-        // Output the step information with r and z
-        System.out.printf("[t_%d] h_%d (%d), u_%d (%d) -> r=%d, z=%d%n",
-                time,
-                incomingEdge != null ? incomingEdge.getId() : -1,  // h_i
-                incomingEdge != null ? incomingEdge.getCost() : 0, // Edge cost
-                currentNode.getId(),  // u_i
-                currentNode.getResources(), // Node resources
-                currentState.getResources(),  // r - current resources
-                Math.min(resourcesBeforeUpdate, nodeResources) // z - min resources before collecting
-        );
+        // Update the best state if the new state has higher resources
+        if (updatedState.getResources() > maxResources && updatedState.getBudget() >= 0) {
+            maxResources = updatedState.getResources();
+            bestState = new State(updatedState.getBudget());
+            bestState.setResources(updatedState.getResources());
+            bestState.getStateSteps().clear();
+            bestState.getStateSteps().addAll(updatedState.getStateSteps());
+        }
 
-        // Explore all possible edges from the current node
+        // Log the current step information without affecting the budget by resources
+        logStepInfo(incomingEdge, currentNode, currentState.getResources(), nodeResources, updatedState);
+
+        // Generate unique key based on current state and visited nodes
+        String stateKey = generateStateKey(currentNode, updatedState);
+
+        // If we haven't visited this exact state, add to visited
+        if (!visitedStates.containsKey(stateKey)) {
+            visitedStates.put(stateKey, new State(updatedState.getBudget(), updatedState.getResources()));
+        }
+
+        // Explore each edge from the current node
         for (Edge edge : currentNode.getEdges()) {
+            if (traversedEdges.contains(edge)) {
+                continue;  // Skip already traversed edges
+            }
+
             Node nextNode = edge.getTarget();
             int edgeCost = edge.getCost();
 
-            // Ensure the path remains within budget
-            if (currentState.getBudget() >= edgeCost) {
-                State newState = new State(currentState.getBudget() - edgeCost);
-                newState.setResources(currentState.getResources());
+            // Check if budget is sufficient for this edge cost
+            if (updatedState.getBudget() >= edgeCost) {
+                // Update the budget first (subtract edge cost)
+                updatedState.setBudget(updatedState.getBudget() - edgeCost);
+
+                // Clone the updated state for this path with deducted edge cost
+                State newState = new State(updatedState.getBudget());
+                newState.setResources(updatedState.getResources());
+                newState.getStateSteps().addAll(updatedState.getStateSteps());
                 newState.addStep(time++, edge, nextNode);
 
-                exploreNode(nextNode, newState, edge, new HashSet<>(currentPath));
+                // Mark this edge as used
+                traversedEdges.add(edge);
+
+                // Recursively explore the next node
+                exploreNode(nextNode, newState, edge, new HashSet<>(currentPath), traversedEdges);
             }
         }
 
-        // Backtrack (remove node from current path)
+        // Backtracking: restore node resources for future paths
+        currentNode.setResources(nodeResources);  // Restore original resources value
         currentPath.remove(currentNode);
     }
+
+
+    private void logStepInfo(Edge incomingEdge, Node currentNode, int resourcesBeforeUpdate, int nodeResources, State currentState) {
+        System.out.printf("[t_%d] h_%d (%d), u_%d (%d) -> r=%d, z=%d%n",
+                time,
+                incomingEdge != null ? incomingEdge.getId() : -1,
+                incomingEdge != null ? incomingEdge.getCost() : 0,
+                currentNode.getId(),
+                nodeResources,
+                currentState.getBudget(),
+                currentState.getResources()
+        );
+    }
+
+    // Generates a unique key to track visited states based on the node and the current state's resources and budget.
+    private String generateStateKey(Node currentNode, State currentState) {
+        return "Node:" + currentNode.getId() +
+                "_Budget:" + currentState.getBudget() +
+                "_Resources:" + currentState.getResources();
+    }
+
 }
