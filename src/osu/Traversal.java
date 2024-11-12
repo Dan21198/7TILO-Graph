@@ -50,7 +50,7 @@ public class Traversal {
     private void printNodeTraversal(Node fromNode, Node toNode, Edge edge) {
         // Print the traversal with step count, edge cost (h_), and node resources (u_)
         System.out.printf("[t_%d] h_%d (%d), u_%d (%d) -> r=%d, z=%d%n",
-                stepCount++, edge.getCost(), fromNode.getId(),  // h_1 is now edge cost
+                stepCount++, edge.getId(), edge.getCost(),  // h_1 is now edge cost
                 toNode.getId(), toNode.getResource(), budget, currentResources);  // u_1 is node resource
     }
 }
