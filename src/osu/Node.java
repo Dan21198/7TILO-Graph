@@ -5,38 +5,18 @@ import java.util.List;
 
 public class Node {
     private int id;
-    private int resources;
-    private boolean isInitial;
-    private List<Edge> edges;
+    private int resource;
 
-    public Node(int id, int resources, boolean isInitial) {
+    public Node(int id, int resource) {
         this.id = id;
-        this.resources = resources;
-        this.isInitial = isInitial;
-        this.edges = new ArrayList<>();
-    }
-
-    public void addEdge(Edge edge) {
-        edges.add(edge);
-    }
-
-    public int getResources() {
-        return resources;
-    }
-
-    public void setResources(int resources) {
-        this.resources = resources;
-    }
-
-    public boolean isInitial() {
-        return isInitial;
+        this.resource = resource;
     }
 
     public int getId() {
         return id;
     }
 
-    public List<Edge> getEdges() {
-        return edges;
+    public int getResource() {
+        return resource;
     }
 }
