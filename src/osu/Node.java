@@ -6,6 +6,7 @@ import java.util.List;
 public class Node {
     private int id;
     private int resource;
+    private boolean resourceCollected;
 
     public Node(int id, int resource) {
         this.id = id;
@@ -18,5 +19,13 @@ public class Node {
 
     public int getResource() {
         return resource;
+    }
+
+    public boolean isResourceCollected() {
+        return resourceCollected;
+    }
+
+    public void setResourceCollected(boolean resourceCollected) {
+        this.resourceCollected = resourceCollected;
     }
 }
