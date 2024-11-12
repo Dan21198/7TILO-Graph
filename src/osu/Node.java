@@ -3,7 +3,7 @@ package osu;
 import java.util.ArrayList;
 import java.util.List;
 
-class Node {
+public class Node {
     private int id;
     private int resources;
     private boolean isInitial;
@@ -17,10 +17,10 @@ class Node {
     }
 
     public int getId() { return id; }
-    public int getResources() { return resources; }    // Changed from getResource
+    public int getResources() { return resources; }
     public void setResources(int resources) { this.resources = resources; }
     public boolean isInitial() { return isInitial; }
     public List<Edge> getEdges() { return edges; }
-    public void addEdge(Edge edge) { edges.add(edge); }
 
+    public void addEdge(Edge edge) { edges.add(edge); }
 }

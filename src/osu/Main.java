@@ -30,8 +30,8 @@ public class Main {
         optimizer.addNode(node3);
         optimizer.addNode(node4);
 
-        // Run optimization
+        // Run optimization with initial budget
         State result = optimizer.optimize(485);
-
     }
 }
+
