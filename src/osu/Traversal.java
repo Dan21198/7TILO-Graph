@@ -1,5 +1,8 @@
 package osu;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Traversal {
     private Graph graph;
     private int budget;
@@ -17,21 +20,23 @@ public class Traversal {
 
     public void startTraversal() {
         // Get the first node (starting point)
-        Node startNode = graph.getNodes().get(0);  // Start at the first node
+        Node startNode = graph.getNodes().getFirst();
 
-        // Collect resources of the first node at the beginning (t_1)
-        currentResources += startNode.getResource();
-        maxResourcesCollected = currentResources;  // Update max resources collected
+        // Add resources of the first node to maxResourcesCollected (z value)
+        maxResourcesCollected += startNode.getResource();
 
         // Print the starting position as t_1 (no cost to enter the first node, h_0)
         System.out.printf("[t_1] h_0 (0), u_%d (%d) -> r=%d, z=%d%n",
-                startNode.getId(), startNode.getResource(), budget, currentResources);
+                startNode.getId(), startNode.getResource(), budget, maxResourcesCollected);
 
         // Start traversing edges and increment stepCount for each new traversal
         stepCount++;
 
+        // A list of edges sorted by resource-to-cost ratio (greedy strategy)
+        List<Edge> sortedEdges = sortEdgesByResourceCostRatio(graph.getEdges());
+
         // Loop over edges for traversal
-        for (Edge edge : graph.getEdges()) {
+        for (Edge edge : sortedEdges) {
             Node fromNode = edge.getFromNode();
             Node toNode = edge.getToNode();
 
@@ -47,10 +52,20 @@ public class Traversal {
         }
     }
 
+    private List<Edge> sortEdgesByResourceCostRatio(List<Edge> edges) {
+        List<Edge> sortedEdges = new ArrayList<>(edges);
+        sortedEdges.sort((e1, e2) -> {
+            double ratio1 = (double) e1.getToNode().getResource() / e1.getCost();
+            double ratio2 = (double) e2.getToNode().getResource() / e2.getCost();
+            return Double.compare(ratio2, ratio1);  // Sort in descending order of resource-to-cost ratio
+        });
+        return sortedEdges;
+    }
+
     private void printNodeTraversal(Node fromNode, Node toNode, Edge edge) {
-        // Print the traversal with step count, edge cost (h_), and node resources (u_)
+        // Print the traversal with step count, edge ID, edge cost (h_), and node resources (u_)
         System.out.printf("[t_%d] h_%d (%d), u_%d (%d) -> r=%d, z=%d%n",
-                stepCount++, edge.getId(), edge.getCost(),  // h_1 is now edge cost
+                stepCount++, edge.getId(), edge.getCost(),  // h_1 is now edge ID and cost
                 toNode.getId(), toNode.getResource(), budget, currentResources);  // u_1 is node resource
     }
 }

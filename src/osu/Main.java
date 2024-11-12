@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        // Sample nodes and edges
+
         Node node1 = new Node(1, 5);
         Node node2 = new Node(2, 1);
         Node node3 = new Node(3, 5);
